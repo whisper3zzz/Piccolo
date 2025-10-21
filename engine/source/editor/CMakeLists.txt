@@ -18,6 +18,12 @@ target_include_directories(
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "PiccoloEditor")
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Engine")
 
+# Set working directory for IDEs (Visual Studio, CLion, etc.)
+# This ensures the executable can find PiccoloEditor.ini and assets when run from IDE
+set_target_properties(${TARGET_NAME} PROPERTIES 
+  VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+)
+
 target_compile_options(${TARGET_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/WX->")
 
 target_link_libraries(${TARGET_NAME} PiccoloRuntime)
