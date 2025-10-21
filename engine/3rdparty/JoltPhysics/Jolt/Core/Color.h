@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Core.h"
+#include "IssueReporting.h"
 JPH_NAMESPACE_BEGIN
 
 class Color;
@@ -37,7 +39,7 @@ public:
 	inline Vec4				ToVec4() const															{ return Vec4(r, g, b, a) / 255.0f; }
 
 	/// Get grayscale intensity of color
-	inline uint8			GetIntensity() const													{ return uint8((uint32(r) * 54 + g * 183 + b * 19) >> 8); }
+	inline uint8			GetIntensity() const													{ return static_cast<uint8>((static_cast<uint32>(r) * 54 + g * 183 + b * 19) >> 8); }
 
 	/// Get a visually distinct color
 	static Color			sGetDistinctColor(int inIndex);

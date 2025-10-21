@@ -4,9 +4,7 @@
 #pragma once
 
 #include <Jolt/Math/Float4.h>
-#include <Jolt/Math/Swizzle.h>
 #include <Jolt/Math/MathTypes.h>
-
 JPH_NAMESPACE_BEGIN
 
 class [[nodiscard]] Vec4

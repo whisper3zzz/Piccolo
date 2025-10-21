@@ -51,6 +51,7 @@ if(NOT TARGET Jolt)
 
     add_subdirectory(JoltPhysics/Build)
 
+
     # Disable precompiled headers for JoltPhysics to avoid PCH compilation issues
     if(MSVC AND TARGET Jolt)
         get_target_property(JOLT_SOURCES Jolt SOURCES)
