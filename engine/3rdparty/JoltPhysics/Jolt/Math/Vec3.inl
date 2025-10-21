@@ -213,9 +213,9 @@ Vec3 Vec3::sFusedMultiplyAdd(Vec3Arg inMul1, Vec3Arg inMul2, Vec3Arg inAdd)
 {
 #if defined(JPH_USE_SSE)
 	#ifdef JPH_USE_FMADD
-		return _mm_fmadd_ps(inMul1.mValue, inMul2.mValue, inAdd.mValue);
+		return Vec3(_mm_fmadd_ps(inMul1.mValue, inMul2.mValue, inAdd.mValue));
 	#else
-		return _mm_add_ps(_mm_mul_ps(inMul1.mValue, inMul2.mValue), inAdd.mValue);
+		return Vec3(_mm_add_ps(_mm_mul_ps(inMul1.mValue, inMul2.mValue), inAdd.mValue));
 	#endif
 #elif defined(JPH_USE_NEON)
 	return vmlaq_f32(inAdd.mValue, inMul1.mValue, inMul2.mValue);
