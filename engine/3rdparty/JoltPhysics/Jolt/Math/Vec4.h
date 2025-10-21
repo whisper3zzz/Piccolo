@@ -24,9 +24,10 @@ public:
 	/// Constructor
 								Vec4() = default; ///< Intentionally not initialized for performance reasons
 								Vec4(const Vec4 &inRHS) = default;
+								Vec4 &operator = (const Vec4 &inRHS) = default;
 	explicit JPH_INLINE			Vec4(Vec3Arg inRHS);							///< WARNING: W component undefined!
 	JPH_INLINE					Vec4(Vec3Arg inRHS, float inW);
-	JPH_INLINE					Vec4(Type inRHS) : mValue(inRHS)				{ }
+	JPH_INLINE					explicit Vec4(const Type inRHS) : mValue(inRHS)				{ }
 
 	/// Create a vector from 4 components
 	JPH_INLINE					Vec4(float inX, float inY, float inZ, float inW);

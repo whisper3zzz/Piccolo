@@ -35,8 +35,9 @@ public:
 	///@{
 	inline						Quat() = default; ///< Intentionally not initialized for performance reasons
 								Quat(const Quat &inRHS) = default;
-	inline						Quat(float inX, float inY, float inZ, float inW)				: mValue(inX, inY, inZ, inW) { }
-	inline explicit				Quat(Vec4Arg inV)												: mValue(inV) { }
+								Quat &operator = (const Quat &inRHS) = default;
+							Quat(const float inX, const float inY, float inZ, float inW)				: mValue(inX, inY, inZ, inW) { }
+	inline explicit				Quat(const Vec4Arg inV)												: mValue(inV) { }
 	///@}
 								
 	///@name Tests					

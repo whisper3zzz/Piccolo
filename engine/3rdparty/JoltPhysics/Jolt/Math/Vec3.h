@@ -26,8 +26,9 @@ public:
 	/// Constructor
 								Vec3() = default; ///< Intentionally not initialized for performance reasons
 								Vec3(const Vec3 &inRHS) = default;
+								Vec3 &operator = (const Vec3 &inRHS) = default;
 	explicit JPH_INLINE			Vec3(Vec4Arg inRHS);
-	JPH_INLINE					Vec3(Type inRHS) : mValue(inRHS)				{ CheckW(); }
+	JPH_INLINE					explicit Vec3(const Type inRHS) : mValue(inRHS)				{ CheckW(); }
 
 	/// Load 3 floats from memory
 	explicit JPH_INLINE			Vec3(const Float3 &inV);

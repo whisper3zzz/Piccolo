@@ -62,7 +62,7 @@ public:
 	void				Read(Vec3 &outVec)
 	{
 		ReadBytes(&outVec, 3 * sizeof(float));
-		outVec = Vec3::sFixW(outVec.mValue);
+		outVec = Vec3(Vec3::sFixW(outVec.mValue));
 	}
 };
 

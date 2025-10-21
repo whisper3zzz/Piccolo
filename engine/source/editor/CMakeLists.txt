@@ -18,6 +18,11 @@ target_include_directories(
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "PiccoloEditor")
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Engine")
 
+# Set working directory for Visual Studio and other IDEs
+set_target_properties(${TARGET_NAME} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${BINARY_ROOT_DIR}"
+)
+
 target_compile_options(${TARGET_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/WX->")
 
 target_link_libraries(${TARGET_NAME} PiccoloRuntime)
@@ -30,6 +35,8 @@ set(POST_BUILD_COMMANDS
   COMMAND ${CMAKE_COMMAND} -E copy "${ENGINE_ROOT_DIR}/${DEVELOP_CONFIG_DIR}/${TARGET_NAME}.ini" "$<TARGET_FILE_DIR:${TARGET_NAME}>/"
   COMMAND ${CMAKE_COMMAND} -E remove_directory "${BINARY_ROOT_DIR}/${ENGINE_ASSET_DIR}"
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${ENGINE_ROOT_DIR}/${ENGINE_ASSET_DIR}" "${BINARY_ROOT_DIR}/${ENGINE_ASSET_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/resource" "$<TARGET_FILE_DIR:${TARGET_NAME}>/resource"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${ENGINE_ROOT_DIR}/${ENGINE_ASSET_DIR}" "$<TARGET_FILE_DIR:${TARGET_NAME}>${ENGINE_ASSET_DIR}"
 )
 
 
@@ -41,7 +48,7 @@ if(ENABLE_PHYSICS_DEBUG_RENDERER)
 )
 endif()
 
-add_custom_command(TARGET ${TARGET_NAME} ${POST_BUILD_COMMANDS})
+add_custom_command(TARGET ${TARGET_NAME} POST_BUILD ${POST_BUILD_COMMANDS})
 
 #precompile
 #set global vari used by precompile

@@ -23,8 +23,8 @@ uint AABBTreeBuilder::Node::GetMinDepth() const
 {
 	if (HasChildren())
 	{
-		uint left = mChild[0]->GetMinDepth();
-		uint right = mChild[1]->GetMinDepth();
+		const uint left = mChild[0]->GetMinDepth();
+		const uint right = mChild[1]->GetMinDepth();
 		return min(left, right) + 1;
 	}
 	else

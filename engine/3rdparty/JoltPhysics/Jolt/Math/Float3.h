@@ -11,9 +11,10 @@ JPH_NAMESPACE_BEGIN
 class [[nodiscard]] Float3
 {
 public:
-				Float3() = default; ///< Intentionally not initialized for performance reasons
-				Float3(const Float3 &inRHS) = default;
-				Float3(float inX, float inY, float inZ) : x(inX), y(inY), z(inZ) { }
+	Float3() = default; ///< Intentionally not initialized for performance reasons
+	Float3(const Float3 &inRHS) = default;
+	Float3 &operator = (const Float3 &inRHS) = default;
+	Float3(float inX, float inY, float inZ) : x(inX), y(inY), z(inZ) { }
 
 	float		operator [] (int inCoordinate) const	
 	{ 

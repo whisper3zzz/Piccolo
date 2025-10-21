@@ -9,6 +9,8 @@
 
 JPH_SUPPRESS_WARNINGS_STD_BEGIN
 #include <algorithm>
+#include <chrono>
+#include <thread>
 JPH_SUPPRESS_WARNINGS_STD_END
 
 #ifdef JPH_PLATFORM_WINDOWS
@@ -95,24 +97,23 @@ void JobSystemThreadPool::BarrierImpl::AddJob(const JobHandle &inJob)
 	bool release_semaphore = false;
 
 	// Set the barrier on the job, this returns true if the barrier was successfully set (otherwise the job is already done and we don't need to add it to our list)
-	Job *job = inJob.GetPtr();
-	if (job->SetBarrier(this))
+	if (Job *job = inJob.GetPtr();job->SetBarrier(this))
 	{
 		// If the job can be executed we want to release the semaphore an extra time to allow the waiting thread to start executing it
-		mNumToAcquire++;
+		++mNumToAcquire;
 		if (job->CanBeExecuted())
 		{
 			release_semaphore = true;
-			mNumToAcquire++;
+			++mNumToAcquire;
 		}
 
 		// Add the job to our job list
 		job->AddRef();
-		uint write_index = mJobWriteIndex++;
+		const uint write_index = mJobWriteIndex++;
 		while (write_index - mJobReadIndex >= cMaxJobs)
 		{
 			JPH_ASSERT(false, "Barrier full, stalling!");
-			this_thread::sleep_for(100us);
+			this_thread::sleep_for(std::chrono::microseconds(100));
 		}
 		mJobs[write_index & (cMaxJobs - 1)] = job;
 	}
@@ -135,20 +136,20 @@ void JobSystemThreadPool::BarrierImpl::AddJobs(const JobHandle *inHandles, uint 
 		if (job->SetBarrier(this))
 		{
 			// If the job can be executed we want to release the semaphore an extra time to allow the waiting thread to start executing it
-			mNumToAcquire++;
+			++mNumToAcquire;
 			if (!release_semaphore && job->CanBeExecuted())
 			{
 				release_semaphore = true;
-				mNumToAcquire++;
+				++mNumToAcquire;
 			}
 
 			// Add the job to our job list
 			job->AddRef();
-			uint write_index = mJobWriteIndex++;
+			const uint write_index = mJobWriteIndex++;
 			while (write_index - mJobReadIndex >= cMaxJobs)
 			{
 				JPH_ASSERT(false, "Barrier full, stalling!");
-				this_thread::sleep_for(100us);
+				this_thread::sleep_for(std::chrono::microseconds(100));
 			}
 			mJobs[write_index & (cMaxJobs - 1)] = job;
 		}
@@ -159,7 +160,7 @@ void JobSystemThreadPool::BarrierImpl::AddJobs(const JobHandle *inHandles, uint 
 		mSemaphore.Release();
 }
 
-void JobSystemThreadPool::BarrierImpl::OnJobFinished(Job *inJob)
+void JobSystemThreadPool::BarrierImpl::OnJobFinished(Job * /*inJob*/)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -345,7 +346,7 @@ JobHandle JobSystemThreadPool::CreateJob(const char *inJobName, ColorArg inColor
 		if (index != AvailableJobs::cInvalidObjectIndex)
 			break;
 		JPH_ASSERT(false, "No jobs available!");
-		this_thread::sleep_for(100us);
+		this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 	Job *job = &mJobs.Get(index);
 	
@@ -434,10 +435,10 @@ void JobSystemThreadPool::QueueJobInternal(Job *inJob)
 			if (old_value - head >= cQueueLength)
 			{
 				// Wake up all threads in order to ensure that they can clear any nullptrs they may not have processed yet
-				mSemaphore.Release((uint)mThreads.size()); 
+				mSemaphore.Release(static_cast<uint>(mThreads.size()));
 
 				// Sleep a little (we have to wait for other threads to update their head pointer in order for us to be able to continue)
-				this_thread::sleep_for(100us);
+				this_thread::sleep_for(std::chrono::microseconds(100));
 				continue;
 			}
 		}
@@ -509,7 +510,7 @@ static void SetThreadName(const char *inName)
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
 	info.szName = inName;
-	info.dwThreadID = (DWORD)-1;
+	info.dwThreadID = static_cast<DWORD>(-1);
 	info.dwFlags = 0;
 
 	__try
@@ -530,7 +531,7 @@ void JobSystemThreadPool::ThreadMain([[maybe_unused]] const char *inName, int in
 #endif
 
 	// Enable floating point exceptions
-	FPExceptionsEnable enable_exceptions;
+	const FPExceptionsEnable enable_exceptions;
 	JPH_UNUSED(enable_exceptions);
 
 	JPH_PROFILE_THREAD_START(inName);
@@ -549,18 +550,16 @@ void JobSystemThreadPool::ThreadMain([[maybe_unused]] const char *inName, int in
 			while (head != mTail)
 			{
 				// Exchange any job pointer we find with a nullptr
-				atomic<Job *> &job = mQueue[head & (cQueueLength - 1)];
-				if (job.load() != nullptr)
+				if (atomic<Job *> &job = mQueue[head & (cQueueLength - 1)];job.load() != nullptr)
 				{
-					Job *job_ptr = job.exchange(nullptr);
-					if (job_ptr != nullptr)
+					if (Job *job_ptr = job.exchange(nullptr);job_ptr != nullptr)
 					{
 						// And execute it
 						job_ptr->Execute();
 						job_ptr->Release();
 					}
 				}
-				head++;
+				++head;
 			}
 		}
 	}

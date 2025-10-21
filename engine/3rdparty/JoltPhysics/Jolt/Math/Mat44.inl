@@ -15,7 +15,7 @@ Mat44::Mat44(Vec4Arg inC1, Vec4Arg inC2, Vec4Arg inC3, Vec4Arg inC4) :
 }
 
 Mat44::Mat44(Type inC1, Type inC2, Type inC3, Type inC4) : 
-	mCol { inC1, inC2, inC3, inC4 } 
+	mCol { Vec4(inC1), Vec4(inC2), Vec4(inC3), Vec4(inC4) }
 {
 }
 
@@ -179,7 +179,7 @@ Mat44 Mat44::sCrossProduct(Vec3Arg inV)
 		_mm_shuffle_ps(v, min_v, _MM_SHUFFLE(3, 1, 2, 3)), // [0, z, -y, 0]
 		_mm_shuffle_ps(min_v, v, _MM_SHUFFLE(3, 0, 3, 2)), // [-z, 0, x, 0]
 		_mm_blend_ps(_mm_shuffle_ps(v, v, _MM_SHUFFLE(3, 3, 3, 1)), _mm_shuffle_ps(min_v, min_v, _MM_SHUFFLE(3, 3, 0, 3)), 0b0010), // [y, -x, 0, 0]
-		Vec4(0, 0, 0, 1));
+		Vec4(0, 0, 0, 1).mValue);
 #else
 	float x = inV.GetX();
 	float y = inV.GetY();
@@ -245,7 +245,7 @@ Vec3 Mat44::operator * (Vec3Arg inV) const
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[1].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(1, 1, 1, 1))));
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[2].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(2, 2, 2, 2))));
 	t = _mm_add_ps(t, mCol[3].mValue);
-	return Vec3::sFixW(t);
+	return Vec3(Vec3::sFixW(t));
 #elif defined(JPH_USE_NEON)
 	Type t = vmulq_f32(mCol[0].mValue, vdupq_laneq_f32(inV.mValue, 0));
 	t = vmlaq_f32(t, mCol[1].mValue, vdupq_laneq_f32(inV.mValue, 1));
@@ -264,7 +264,7 @@ Vec4 Mat44::operator * (Vec4Arg inV) const
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[1].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(1, 1, 1, 1))));
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[2].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(2, 2, 2, 2))));
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[3].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(3, 3, 3, 3))));
-	return t;
+	return Vec4(t);
 #elif defined(JPH_USE_NEON)
 	Type t = vmulq_f32(mCol[0].mValue, vdupq_laneq_f32(inV.mValue, 0));
 	t = vmlaq_f32(t, mCol[1].mValue, vdupq_laneq_f32(inV.mValue, 1));
@@ -282,7 +282,7 @@ Vec3 Mat44::Multiply3x3(Vec3Arg inV) const
 	__m128 t = _mm_mul_ps(mCol[0].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(0, 0, 0, 0)));
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[1].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(1, 1, 1, 1))));
 	t = _mm_add_ps(t, _mm_mul_ps(mCol[2].mValue, _mm_shuffle_ps(inV.mValue, inV.mValue, _MM_SHUFFLE(2, 2, 2, 2))));
-	return Vec3::sFixW(t);
+	return Vec3(Vec3::sFixW(t));
 #elif defined(JPH_USE_NEON)
 	Type t = vmulq_f32(mCol[0].mValue, vdupq_laneq_f32(inV.mValue, 0));
 	t = vmlaq_f32(t, mCol[1].mValue, vdupq_laneq_f32(inV.mValue, 1));
@@ -301,7 +301,7 @@ Vec3 Mat44::Multiply3x3Transposed(Vec3Arg inV) const
 	__m128 xy = _mm_blend_ps(x, y, 0b0010);
 	__m128 z = _mm_dp_ps(mCol[2].mValue, inV.mValue, 0x7f);
 	__m128 xyzz = _mm_blend_ps(xy, z, 0b1100);
-	return xyzz;
+	return Vec3(xyzz);
 #else
 	return Transposed3x3().Multiply3x3(inV);
 #endif
@@ -1005,7 +1005,7 @@ Mat44 Mat44::sQuatLeftMultiply(QuatArg inQ)
 		inQ.mValue);
 }
 
-Mat44 Mat44::sQuatRightMultiply(QuatArg inQ)
+Mat44 Mat44::sQuatRightMultiply(const QuatArg inQ)
 {
 	return Mat44(
 		Vec4(1, -1, 1, -1) * inQ.mValue.Swizzle<SWIZZLE_W, SWIZZLE_Z, SWIZZLE_Y, SWIZZLE_X>(),
@@ -1026,11 +1026,11 @@ Mat44 Mat44::GetRotation() const
 Mat44 Mat44::GetRotationSafe() const
 { 
 #if defined(JPH_USE_SSE4_1)
-	__m128 zero = _mm_setzero_ps(); 
+	const __m128 zero = _mm_setzero_ps();
 	return Mat44(_mm_blend_ps(mCol[0].mValue, zero, 8),
 				 _mm_blend_ps(mCol[1].mValue, zero, 8),
 				 _mm_blend_ps(mCol[2].mValue, zero, 8),
-				 Vec4(0, 0, 0, 1)); 
+				 Vec4(0, 0, 0, 1).mValue);
 #elif defined(JPH_USE_NEON)
 	return Mat44(vsetq_lane_f32(0, mCol[0].mValue, 3),
 				 vsetq_lane_f32(0, mCol[1].mValue, 3),

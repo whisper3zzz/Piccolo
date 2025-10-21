@@ -80,9 +80,8 @@ Quat Quat::sRotation(Vec3Arg inAxis, float inAngle)
 void Quat::GetAxisAngle(Vec3 &outAxis, float &outAngle) const
 {
 	JPH_ASSERT(IsNormalized());
-	Quat w_pos = EnsureWPositive();
-	float abs_w = w_pos.GetW();
-	if (abs_w >= 1.0f)
+	const Quat w_pos = EnsureWPositive();
+	if (const float abs_w = w_pos.GetW();abs_w >= 1.0f)
 	{ 
 		outAxis = Vec3::sZero();
 		outAngle = 0.0f;

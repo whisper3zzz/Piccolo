@@ -41,6 +41,7 @@ if(NOT TARGET Jolt)
     option(TARGET_SAMPLES "" OFF)
     option(TARGET_UNIT_TESTS "" OFF)
     option(TARGET_VIEWER "" OFF)
+    option(USE_STATIC_MSVC_RUNTIME_LIBRARY "" OFF)
 
     if(ENABLE_PHYSICS_DEBUG_RENDERER)
         option(TARGET_TEST_FRAMEWORK "" ON)
@@ -49,6 +50,14 @@ if(NOT TARGET Jolt)
     endif()
 
     add_subdirectory(JoltPhysics/Build)
+
+    # Disable precompiled headers for JoltPhysics to avoid PCH compilation issues
+    if(MSVC AND TARGET Jolt)
+        get_target_property(JOLT_SOURCES Jolt SOURCES)
+        foreach(source_file ${JOLT_SOURCES})
+            set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "")
+        endforeach()
+    endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         include(CheckCXXCompilerFlag)

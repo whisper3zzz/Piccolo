@@ -26,19 +26,20 @@ public:
 	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(MotorSettings)
 
 	/// Constructor
-							MotorSettings() = default;
-							MotorSettings(const MotorSettings &inRHS) = default;
-							MotorSettings(float inFrequency, float inDamping) : mFrequency(inFrequency), mDamping(inDamping) { JPH_ASSERT(IsValid()); }
+						MotorSettings() = default;
+						MotorSettings(const MotorSettings &inRHS) = default;
+						MotorSettings &operator = (const MotorSettings &inRHS) = default;
+						MotorSettings(float inFrequency, float inDamping) : mFrequency(inFrequency), mDamping(inDamping) { JPH_ASSERT(IsValid()); }
 							MotorSettings(float inFrequency, float inDamping, float inForceLimit, float inTorqueLimit) : mFrequency(inFrequency), mDamping(inDamping), mMinForceLimit(-inForceLimit), mMaxForceLimit(inForceLimit), mMinTorqueLimit(-inTorqueLimit), mMaxTorqueLimit(inTorqueLimit) { JPH_ASSERT(IsValid()); }
 
 	/// Set asymmetric force limits
-	void					SetForceLimits(float inMin, float inMax)	{ JPH_ASSERT(inMin <= inMax); mMinForceLimit = inMin; mMaxForceLimit = inMax; }
+	void SetForceLimits(const float inMin, const float inMax)	{ JPH_ASSERT(inMin <= inMax); mMinForceLimit = inMin; mMaxForceLimit = inMax; }
 
 	/// Set asymmetric torque limits
-	void					SetTorqueLimits(float inMin, float inMax)	{ JPH_ASSERT(inMin <= inMax); mMinTorqueLimit = inMin; mMaxTorqueLimit = inMax; }
+	void SetTorqueLimits(float inMin, float inMax)	{ JPH_ASSERT(inMin <= inMax); mMinTorqueLimit = inMin; mMaxTorqueLimit = inMax; }
 
 	/// Set symmetric force limits
-	void					SetForceLimit(float inLimit)				{ mMinForceLimit = -inLimit; mMaxForceLimit = inLimit; }
+	void SetForceLimit(float inLimit)	{ mMinForceLimit = -inLimit; mMaxForceLimit = inLimit; }
 
 	/// Set symmetric torque limits
 	void					SetTorqueLimit(float inLimit)				{ mMinTorqueLimit = -inLimit; mMaxTorqueLimit = inLimit; }
